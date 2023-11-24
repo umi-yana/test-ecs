@@ -1,4 +1,5 @@
 terraform {
+  required_version = "~> 1.6.4"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -19,7 +20,7 @@ provider "aws" {
   profile = "default"
   region  = "ap-northeast-1"
 }
-  
+
 # S3バケット初期設定
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "${local.defult_name}-terraform-tfstate"
