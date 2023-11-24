@@ -28,13 +28,13 @@ resource "aws_ecs_cluster" "cluster" {
 }
 
 resource "aws_ecs_task_definition" "task_definition" {
-  family                = var.default_name
-  cpu                   = "256"
-  memory                = "512"
-  network_mode          = "awsvpc"
+  family                   = var.default_name
+  cpu                      = "256"
+  memory                   = "512"
+  network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
-  container_definitions = <<JSON
+  container_definitions    = <<JSON
   [
     {
       "name": "${var.default_name}",

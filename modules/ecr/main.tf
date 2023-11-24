@@ -4,7 +4,7 @@ resource "aws_ecr_repository" "test_repository" {
 
 resource "aws_ecr_lifecycle_policy" "test_ecr_lifecycle_policy" {
   repository = aws_ecr_repository.test_repository.name
-  policy = <<EOF
+  policy     = <<EOF
   {
     "rules": [
       {
