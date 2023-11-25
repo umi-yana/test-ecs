@@ -24,6 +24,8 @@ provider "aws" {
 # S3バケット初期設定
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "${local.defult_name}-terraform-tfstate"
+  # destoy防止
+
 }
 
 resource "aws_s3_bucket_versioning" "terraform_state_version" {

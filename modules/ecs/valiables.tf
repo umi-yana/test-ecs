@@ -5,3 +5,11 @@ variable "default_name" {
 variable "ecr_image" {
   type = string
 }
+
+variable "aws_security_group" {
+  type = string
+}
+
+variable "subnet_id" {
+  type = string
+}

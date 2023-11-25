@@ -59,3 +59,21 @@ resource "aws_ecs_task_definition" "task_definition" {
   ]
   JSON
 }
+
+
+resource "aws_ecs_service" "test_ecs_service" {
+  name            = "${var.default_name}-ecs-service"
+  cluster         = aws_ecs_cluster.cluster.arn
+  task_definition = aws_ecs_task_definition.task_definition.arn
+  desired_count   = 2
+  launch_type     = "FARGATE"
+  # health_check_grace_period_seconds = 60
+  network_configuration {
+    subnets         = [var.subnet_id]
+    security_groups = [var.aws_security_group]
+  }
+
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
+}
