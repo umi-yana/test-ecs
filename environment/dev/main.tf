@@ -8,10 +8,17 @@ module "network" {
   default_name = local.defult_name
 }
 
-module "ecs" {
-  source             = "../../modules/ecs"
-  default_name       = local.defult_name
-  ecr_image          = var.ecr_image
-  aws_security_group = module.network.security_group_id
-  subnet_id          = module.network.subnet_id
+module "security_group" {
+  source       = "../../modules/security_group"
+  default_name = local.defult_name
+  vpc_id       = module.network.vpc_id
 }
+
+module "ecs" {
+  source            = "../../modules/ecs"
+  default_name      = local.defult_name
+  ecr_image         = var.ecr_image
+  security_group_id = module.security_group.security_group_id
+  subnet_id         = module.network.private-subnet-1
+}
+

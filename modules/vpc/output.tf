@@ -1,7 +1,7 @@
-output "subnet_id" {
-  value = aws_subnet.example.id
+output "private-subnet-1" {
+  value = aws_subnet.private-subnet-1.id
 }
 
-output "security_group_id" {
-  value = aws_security_group.example.id
+output "vpc_id" {
+  value = aws_vpc.production-vpc.id
 }

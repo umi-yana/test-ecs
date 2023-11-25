@@ -6,8 +6,7 @@ variable "ecr_image" {
   type = string
 }
 
-variable "aws_security_group" {
-  type = string
+variable "security_group_id" {
 }
 
 variable "subnet_id" {

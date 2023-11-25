@@ -1,5 +1,5 @@
 # ベースイメージを指定
-FROM python:3.9
+FROM --platform=linux/amd64 python:3.9
 
 # 作業ディレクトリを設定
 WORKDIR /usr/src/app

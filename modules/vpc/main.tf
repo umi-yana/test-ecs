@@ -1,52 +1,76 @@
 # VPCの作成
-resource "aws_vpc" "example" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_support   = true
-  enable_dns_hostnames = true
+resource "aws_vpc" "production-vpc" {
+  cidr_block = "10.0.0.0/16"
 }
 
-# サブネットの作成
-resource "aws_subnet" "example" {
-  vpc_id                  = aws_vpc.example.id
-  cidr_block              = "10.0.1.0/24"
-  map_public_ip_on_launch = true
-  availability_zone       = "ap-northeast-1a"
+#Public Subnet #1
+resource "aws_subnet" "public-subnet-1" {
+  cidr_block        = "10.0.1.0/24"
+  vpc_id            = aws_vpc.production-vpc.id
+  availability_zone = "ap-northeast-1a"
 }
 
-# Internet Gatewayの作成
-resource "aws_internet_gateway" "example" {
-  vpc_id = aws_vpc.example.id
+#Private Subnet #1(今後マルチAZ化する可能性があるため（最大AZ X３）　cidr_blockは開けて用意する)
+resource "aws_subnet" "private-subnet-1" {
+  cidr_block        = "10.0.4.0/24"
+  vpc_id            = aws_vpc.production-vpc.id
+  availability_zone = "ap-northeast-1a"
 }
 
-# NAT Gatewayの作成
-resource "aws_eip" "example" {
+#Internet Gateway
+resource "aws_internet_gateway" "production-igw" {
+  vpc_id = aws_vpc.production-vpc.id
+}
+
+#Create a route table 
+resource "aws_route_table" "public-route-table" {
+  vpc_id = aws_vpc.production-vpc.id
+}
+
+# route table と　IGWを紐付け
+resource "aws_route" "public-internet-gw-route" {
+  route_table_id         = aws_route_table.public-route-table.id
+  gateway_id             = aws_internet_gateway.production-igw.id
+  destination_cidr_block = "0.0.0.0/0"
+}
+
+#Associate the routing table to the public subnet
+resource "aws_route_table_association" "public-subnet-1-association" {
+  route_table_id = aws_route_table.public-route-table.id
+  subnet_id      = aws_subnet.public-subnet-1.id
+}
+
+
+#Create a route table 
+resource "aws_route_table" "private-route-table" {
+  vpc_id = aws_vpc.production-vpc.id
+}
+
+#Associate the routing table to the private subnet
+resource "aws_route_table_association" "private-subnet-1-assocaiation" {
+  route_table_id = aws_route_table.private-route-table.id
+  subnet_id      = aws_subnet.private-subnet-1.id
+}
+
+#Create Elastic ip
+resource "aws_eip" "elastic-ip-for-nat-gw" {
   domain     = "vpc"
-  depends_on = [aws_internet_gateway.example]
+  depends_on = [aws_internet_gateway.production-igw]
 }
 
-resource "aws_nat_gateway" "example" {
-  allocation_id = aws_eip.example.id
-  subnet_id     = aws_subnet.example.id
-  depends_on    = [aws_eip.example]
+#Create a nat gateway and place it into public subnet
+resource "aws_nat_gateway" "nat-gw" {
+  allocation_id = aws_eip.elastic-ip-for-nat-gw.id
+  subnet_id     = aws_subnet.public-subnet-1.id
+
+
+  depends_on = [aws_eip.elastic-ip-for-nat-gw]
+
 }
 
-# ルートテーブルの作成
-resource "aws_route_table" "example" {
-  vpc_id = aws_vpc.example.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.example.id
-  }
-}
-
-resource "aws_route_table_association" "example" {
-  subnet_id      = aws_subnet.example.id
-  route_table_id = aws_route_table.example.id
-}
-
-# セキュリティグループの作成
-resource "aws_security_group" "example" {
-  name   = "${var.default_name}_security_group"
-  vpc_id = aws_vpc.example.id
+#Add route to nat gateway in private subnet
+resource "aws_route" "nat_gw_route" {
+  route_table_id         = aws_route_table.private-route-table.id
+  nat_gateway_id         = aws_nat_gateway.nat-gw.id
+  destination_cidr_block = "0.0.0.0/0"
 }
