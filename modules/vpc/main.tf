@@ -22,43 +22,43 @@ resource "aws_internet_gateway" "production-igw" {
   vpc_id = aws_vpc.production-vpc.id
 }
 
-#Create a route table 
+#public用ルートテーブルの作成
 resource "aws_route_table" "public-route-table" {
   vpc_id = aws_vpc.production-vpc.id
 }
 
-# route table と　IGWを紐付け
+#public用ルートテーブルとIGWの紐付け
 resource "aws_route" "public-internet-gw-route" {
   route_table_id         = aws_route_table.public-route-table.id
   gateway_id             = aws_internet_gateway.production-igw.id
   destination_cidr_block = "0.0.0.0/0"
 }
 
-#Associate the routing table to the public subnet
+#public用ルートテーブルとPubilc subnetの紐付け
 resource "aws_route_table_association" "public-subnet-1-association" {
   route_table_id = aws_route_table.public-route-table.id
   subnet_id      = aws_subnet.public-subnet-1.id
 }
 
 
-#Create a route table 
+#private用サブネットの作成
 resource "aws_route_table" "private-route-table" {
   vpc_id = aws_vpc.production-vpc.id
 }
 
-#Associate the routing table to the private subnet
+#private用サブネットとprivate　subnetの紐付け
 resource "aws_route_table_association" "private-subnet-1-assocaiation" {
   route_table_id = aws_route_table.private-route-table.id
   subnet_id      = aws_subnet.private-subnet-1.id
 }
 
-#Create Elastic ip
+#Elastic ipの作成
 resource "aws_eip" "elastic-ip-for-nat-gw" {
   domain     = "vpc"
   depends_on = [aws_internet_gateway.production-igw]
 }
 
-#Create a nat gateway and place it into public subnet
+#NATとpublic-subnetの紐付け
 resource "aws_nat_gateway" "nat-gw" {
   allocation_id = aws_eip.elastic-ip-for-nat-gw.id
   subnet_id     = aws_subnet.public-subnet-1.id
@@ -68,7 +68,7 @@ resource "aws_nat_gateway" "nat-gw" {
 
 }
 
-#Add route to nat gateway in private subnet
+#private-subnetとNAT紐付け
 resource "aws_route" "nat_gw_route" {
   route_table_id         = aws_route_table.private-route-table.id
   nat_gateway_id         = aws_nat_gateway.nat-gw.id

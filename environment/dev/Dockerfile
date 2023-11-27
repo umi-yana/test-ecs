@@ -12,5 +12,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 # アプリケーションのソースコードをコピー
 COPY . .
 
-# アプリケーションの起動コマンド
-CMD ["python", "./your-script.py"]
+

@@ -42,6 +42,7 @@ resource "aws_ecs_task_definition" "task_definition" {
     {
       "name": "${var.default_name}",
       "image": "${var.ecr_image}",
+      "essential": true,
       "portMappings": [
         {
           "containerPort": 80,
