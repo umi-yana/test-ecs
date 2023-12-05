@@ -1,5 +1,0 @@
-version: '3'
-services:
-  python-app:
-    image: 343703002526.dkr.ecr.ap-northeast-1.amazonaws.com/umi-ecs_test_repository:latest
-    command: python your-script.py

@@ -30,48 +30,14 @@ resource "aws_ecs_cluster" "cluster" {
   name = "${var.default_name}-ecs-cluster"
 }
 
-resource "aws_ecs_task_definition" "task_definition" {
-  family                   = var.default_name
-  cpu                      = "256"
-  memory                   = "512"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
-  container_definitions    = <<JSON
-  [
-    {
-      "name": "${var.default_name}",
-      "image": "${var.ecr_image}",
-      "essential": true,
-      "portMappings": [
-        {
-          "containerPort": 80,
-          "hostPort": 80,
-          "protocol": "tcp",
-          "appProtocol": "http"
-        }
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "${aws_cloudwatch_log_group.example.name}",
-          "awslogs-region": "ap-northeast-1",
-          "awslogs-stream-prefix": "${var.default_name}"
-        }
-      }
-    }
-  ]
-  JSON
-}
-
-
 resource "aws_ecs_service" "test_ecs_service" {
   name            = "${var.default_name}-ecs-service"
   cluster         = aws_ecs_cluster.cluster.arn
   task_definition = aws_ecs_task_definition.task_definition.arn
-  desired_count   = 2
-  launch_type     = "FARGATE"
-  # health_check_grace_period_seconds = 60
+  # ecs-compose.ymlで実行する際に並行するタスクを決定するため、terraformでは０で指定する
+  # ０にする背景: desired_count = 1の場合、terraform apply時にタスクが実行してしまうため、０に指定する
+  desired_count = 0
+  launch_type   = "FARGATE"
   network_configuration {
     subnets         = [var.subnet_id]
     security_groups = [var.security_group_id]

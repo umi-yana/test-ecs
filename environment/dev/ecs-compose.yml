@@ -1,0 +1,15 @@
+version: '3'
+services:
+  # ECSのサービスを定義
+  umi-ecs-ecs-service:
+    build: .
+    # TODO:test用
+    image: 343703002526.dkr.ecr.ap-northeast-1.amazonaws.com/umi-ecs_test_repository:latest
+    container_name: platina_data_python
+    logging:
+      # CloudWatch Logsにログを書き込む
+      driver: awslogs
+      options:
+        awslogs-group: /ecs/example
+        awslogs-region: ap-northeast-1
+        awslogs-stream-prefix: ecs

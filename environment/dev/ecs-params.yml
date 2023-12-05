@@ -1,0 +1,26 @@
+#NOTE
+# compose.ymlだと定義できないパラメータが存在するため、ecs-params.ymlで不足情報を定義
+# https://github.com/aws/amazon-ecs-cli/blob/mainline/README.md#creating-a-service
+
+version: 1
+task_definition:
+  # Fargateを使用するのでネットワークモードにawsvpcを指定
+  ecs_network_mode: awsvpc
+  task_execution_role: ecsTaskExecutionRole
+  # TODO:仮設定
+  task_size:
+    cpu_limit: 256
+    mem_limit: 512
+  # terraformで定義した際のタスク実行数を0→１に置換
+  services:
+    umi-ecs-ecs-service:
+      desired_count: 1
+
+run_params:
+  network_configuration:
+    awsvpc_configuration:
+      subnets:
+        - subnet-0f54698d59747bde0
+      security_groups:
+        - sg-071900be62b5b144f
+      assign_public_ip: ENABLED
